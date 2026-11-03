@@ -2,7 +2,7 @@
 
 A read-only multichain wallet explorer. Paste a public address and the app detects the chain automatically. It then shows the native balance, recent transactions with explorer links, tokens and NFTs.
 
-**Live demo:** LIVE_URL
+**Live demo:** https://wallet-explorer-ten.vercel.app
 
 - **EVM addresses** (`0x…`) are looked up on **Ethereum mainnet** and **Base**.
 - **Solana addresses** (base58) are looked up on **Solana mainnet**.

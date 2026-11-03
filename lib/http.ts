@@ -5,7 +5,7 @@ const MAX_ENTRIES = 500;
 
 export class UpstreamError extends Error {}
 
-export async function fetchJson<T>(url: string, init: RequestInit = {}, ttlMs = 60_000): Promise<T> {
+export async function fetchJson<T>(url: string, init: RequestInit = {}, ttlMs = 60_000, timeoutMs = 8000): Promise<T> {
   const key = `${init.method ?? "GET"} ${url} ${typeof init.body === "string" ? init.body : ""}`;
   const hit = cache.get(key);
   if (hit && hit.expires > Date.now()) return hit.value as T;
@@ -16,11 +16,11 @@ export async function fetchJson<T>(url: string, init: RequestInit = {}, ttlMs = 
       res = await fetch(url, {
         ...init,
         headers: { accept: "application/json", "content-type": "application/json", ...(init.headers ?? {}) },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(timeoutMs),
         cache: "no-store",
       });
     } catch {
-      if (attempt === 0) continue;
+      if (attempt === 0 && timeoutMs <= 8000) continue;
       throw new UpstreamError(`Timeout or network error for ${new URL(url).host}`);
     }
     if ((res.status === 429 || res.status >= 500) && attempt === 0) {
