@@ -26,7 +26,7 @@ flowchart LR
     U[Browser] -->|address| P[Next.js page]
     P -->|GET /api/lookup| A[Route handler<br/>detect chain, rate limit, cache]
     A -->|EVM| E1[Public RPCs<br/>publicnode, mainnet.base.org]
-    A -->|EVM| E2[Blockscout API<br/>Ethereum + Base]
+    A -->|EVM| E2[Blockscout + Routescan APIs<br/>Ethereum + Base]
     A -->|Solana| S1[Solana public RPC<br/>mainnet-beta, publicnode]
     E1 & E2 & S1 --> A -->|JSON| P
 ```
@@ -35,12 +35,14 @@ flowchart LR
 
 | Chain | Balance | Transactions | Tokens | NFTs |
 |---|---|---|---|---|
-| Ethereum | JSON-RPC `eth_getBalance` (publicnode, LlamaRPC fallback) | Blockscout `eth.blockscout.com` | Blockscout | Blockscout |
-| Base | JSON-RPC (`mainnet.base.org`, publicnode fallback) | Blockscout `base.blockscout.com` | Blockscout | Blockscout |
+| Ethereum | JSON-RPC `eth_getBalance` (publicnode, LlamaRPC fallback) | Blockscout `eth.blockscout.com` | Routescan (Blockscout fallback) | Blockscout |
+| Base | JSON-RPC (`mainnet.base.org`, publicnode fallback) | Blockscout `base.blockscout.com` (see limits) | Blockscout (see limits) | Blockscout (see limits) |
 | Solana | `getBalance` (mainnet-beta, publicnode fallback) | `getSignaturesForAddress` | `getTokenAccountsByOwner` | Token accounts with amount 1 and 0 decimals |
 
 ## Limits
 
+- **Base: only the balance is reliable right now.** Transactions, tokens and NFTs come from the public Base Blockscout API. At the time of writing it answers HTTP 403 to requests from Vercel's servers, so those sections show "unavailable" with a link to Basescan. No other free keyless source lists Base transactions; Etherscan-style APIs need a key.
+- **Ethereum tokens come from Routescan, with Blockscout as the fallback.** Large wallets (like the vitalik.eth example) hold many spam tokens, so the list isn't filtered for value.
 - **Public endpoints are rate-limited and best-effort.** Under load, a section may show "unavailable". Results are cached for about 60 seconds.
 - **Solana token names and NFT metadata are not shown.** Keyless RPCs don't return them; that needs a paid indexer (for example the DAS API). Mint addresses are shown and linked to Solscan instead, and "possible NFTs" is a heuristic.
 - **Only the newest 10 transactions are shown.** EVM transactions are top-level transactions only, without internal transfers.

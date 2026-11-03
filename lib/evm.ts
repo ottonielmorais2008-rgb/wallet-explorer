@@ -88,14 +88,19 @@ export async function lookupEvm(address: string, chain: keyof typeof CHAINS): Pr
     ),
   );
 
+  const [b, t, tk, n] = await Promise.all([balance, transactions, tokens, nfts]);
+  const blocked = chain === "base" && !t.ok && !tk.ok && !n.ok;
   return {
     chain,
     label: c.label,
     symbol: "ETH",
     addressUrl: ex.address(address),
-    balance: await balance,
-    transactions: await transactions,
-    tokens: await tokens,
-    nfts: await nfts,
+    balance: b,
+    transactions: t,
+    tokens: tk,
+    nfts: n,
+    note: blocked
+      ? "Base history, tokens and NFTs come from the public Base Blockscout API, which sometimes refuses requests from cloud servers. Use the explorer link above for the full history."
+      : undefined,
   };
 }
